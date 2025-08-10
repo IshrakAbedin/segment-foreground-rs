@@ -11,7 +11,7 @@ You can simply build the project using `cargo build` for debug mode and `cargo b
 I fetched the `ONNX` files from the following links:
 
 1. MODNet from [the Google Drive link shared in the official repository](https://drive.google.com/file/d/1cgycTQlYXpTh26gB9FTnthE7AvruV8hd/view?usp=sharing)
-2. U2Net from [the rmbg 🤗 Hugging Face page](https://huggingface.co/tomjackson2023/rembg/blob/main/u2net.onnx)
+2. U2Net from [the rembg 🤗 Hugging Face page](https://huggingface.co/tomjackson2023/rembg/blob/main/u2net.onnx)
 
 ### Running
 Once you have the project compiled and the models placed properly, you can run it either using
