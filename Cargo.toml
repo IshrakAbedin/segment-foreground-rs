@@ -1,0 +1,13 @@
+[package]
+name = "segment-foreground-rs"
+version = "0.1.0"
+edition = "2024"
+authors = ["Mohammad Ishrak Abedin"]
+description = "A command-line tool to segment image foreground using MODNet or U-Square-Net"
+
+[dependencies]
+anyhow = "1.0.98"
+clap = { version = "4.5.43", features = ["derive"] }
+image = "0.25.6"
+ndarray = "0.16.1"
+ort = "=2.0.0-rc.10"
