@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Context, Result, anyhow};
 use image::{GrayImage, ImageReader, Luma, imageops::FilterType};
 use ndarray::{Ix3, Ix4};
 use ort::session::{Session, builder::GraphOptimizationLevel};
@@ -6,11 +6,64 @@ use ort::value::Tensor;
 
 use crate::preprocess::{preprocess_u2net_nchw, resize_with_padding};
 
-/// Run U²-Net (positional input) — typical target size: 320
-pub fn run_u2net(model_path: &str, input_path: &str, output_path: &str) -> Result<()> {
-    let mut session = Session::builder()?
+/// Run U-Square-Net
+pub fn run_u2net(
+    model_path: &str,
+    input_path: &str,
+    output_path: &str,
+    threads: usize,
+    use_cuda: bool,
+    use_tensorrt: bool,
+    use_directml: bool,
+    device_id: i32,
+) -> Result<()> {
+    let mut builder = Session::builder()?
         .with_optimization_level(GraphOptimizationLevel::Level3)?
-        .commit_from_file(model_path)?;
+        .with_intra_threads(threads)?;
+
+    // Optional execution providers (feature-gated at compile time)
+    #[cfg(feature = "tensorrt")]
+    if use_tensorrt {
+        use ort::execution_providers::TensorRTExecutionProvider;
+        let trt = TensorRTExecutionProvider::default()
+            .with_device_id(device_id)
+            .build()
+            .error_on_failure();
+        builder = builder.with_execution_providers([trt])?;
+    }
+
+    #[cfg(feature = "cuda")]
+    if use_cuda {
+        use ort::execution_providers::CUDAExecutionProvider;
+        let cuda = CUDAExecutionProvider::default()
+            .with_device_id(device_id)
+            .build()
+            .error_on_failure();
+        builder = builder.with_execution_providers([cuda])?;
+    }
+
+    #[cfg(feature = "directml")]
+    if use_directml {
+        use ort::execution_providers::DirectMLExecutionProvider;
+        let dml = DirectMLExecutionProvider::default()
+            .with_device_id(device_id)
+            .build()
+            .error_on_failure();
+        builder = builder.with_execution_providers([dml])?;
+    }
+
+    #[cfg(not(any(feature = "cuda", feature = "tensorrt", feature = "directml")))]
+    {
+        if use_cuda || use_tensorrt || use_directml {
+            eprintln!(
+                "Note: you passed --use-cuda/--use-tensorrt/--use-directml but the binary was not built with those features."
+            );
+        }
+    }
+
+    let mut session = builder
+        .commit_from_file(model_path)
+        .with_context(|| format!("Failed to load ONNX model: {}", model_path))?;
 
     // println!(
     //     "Model inputs: {:?}",

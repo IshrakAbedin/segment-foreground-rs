@@ -13,6 +13,8 @@ I fetched the `ONNX` files from the following links:
 1. MODNet from [the Google Drive link shared in the official repository](https://drive.google.com/file/d/1cgycTQlYXpTh26gB9FTnthE7AvruV8hd/view?usp=sharing)
 2. U2Net from [the rembg 🤗 Hugging Face page](https://huggingface.co/tomjackson2023/rembg/blob/main/u2net.onnx)
 
+> It supports optional features for CUDA and TensorRT, but not tested (if you compile with any one of those, consult the *Running* section to learn how to turn on CUDA or TensorRT for inference from the CLI). The support for DirectML is lightly tested and found to be working. The DirectML feature also needs to be turned on for inference from the CLI.
+
 ### Running
 Once you have the project compiled and the models placed properly, you can run it either using
 
@@ -48,6 +50,25 @@ Options:
 
           [default: matte.png]
 
+      --threads <THREADS>
+          Number of intra-op threads for ORT
+
+          [default: 4]
+
+      --use-cuda
+          Try to register CUDA EP (requires building with --features cuda)
+
+      --use-tensorrt
+          Try to register TensorRT EP (requires --features tensorrt). If both TRT and CUDA enabled, TensorRT is preferred first, then CUDA as fallback
+
+      --use-directml
+          Try to register DirectML EP (requires building with --features directml)
+
+  -d, --device-id <DEVICE_ID>
+          Device (GPU) ID to be used with CUDA, TensorRT, or DirectML
+
+          [default: 0]
+
   -h, --help
           Print help (see a summary with '-h')
 
@@ -58,4 +79,4 @@ Options:
 Only the `--input` argument is positional/mandatory. 
 
 ## Note
-> I have let `ort` crate handle the ONNX Runtime. If it creates problem, you might want to look into how to link your own dynamic libraries for ONNX.
+> I have let the `ort` crate handle the ONNX Runtime for both CPU and with CUDA/TensorRT/DirectML acceleration. If it creates problem, you might want to look into how to link your own dynamic libraries for ONNX.

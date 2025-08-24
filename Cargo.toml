@@ -11,3 +11,9 @@ clap = { version = "4.5.43", features = ["derive"] }
 image = "0.25.6"
 ndarray = "0.16.1"
 ort = "=2.0.0-rc.10"
+
+[features]
+# Opt-in accelerators (forwarded to `ort`)
+cuda = ["ort/cuda"]
+tensorrt = ["ort/tensorrt"]
+directml = ["ort/directml"]
